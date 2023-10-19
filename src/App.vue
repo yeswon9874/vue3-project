@@ -1,70 +1,78 @@
 <template>
   <div class="container">
     <h2>To-Do List</h2>
-      <form 
-        @submit.prevent="onSumbit"
-        class="d-flex"
-      >
-        <div class="flex-grow-1 mr-2">
-          <input 
-            class="form-control"
-            type="text" 
-            v-model="todo"
-            placeholder="Type new to-do"
-          >
-        </div>
-        <div>
-          <button 
-            class="btn btn-primary"
-            type="submit"
-            @click="onSumbit"
-          >
-            Add
-          </button>
-        </div>
-      </form>
-      <div class="card mt-2">
-          <div class="card-body p-2">
-            {{ todos[0].subject }}
-          </div>
-      </div>
-      <div class="card mt-2">
-          <div class="card-body p-2">
-            {{ todos[1].subject }}
-          </div>
-      </div>
+    <input
+        class="form-control"
+        type="text" 
+        v-model="searchText"
+        placeholder="Search"
+    >
+    <hr />
+    <TodoSimpleForm @add-todo="addTodo" />
+    
+    <div v-if="!filteredTodos.length">
+      There is nothing to display
+    </div>
+    <!-- 부모에서 자식 보낼때 props -->
+    <TodoList 
+      :todos="filteredTodos" 
+      @toggle-todo="toggleTodo" 
+      @delete-todo="deleteButton"/>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import TodoSimpleForm from './components/TodoSimpleForm.vue';
+import TodoList from './components/TodoList.vue';
 
 export default {
+  components: {
+    TodoSimpleForm,
+    TodoList
+  },
   setup() {
-    const todo = ref('');
-    const todos = ref([
-      {id: 1, subject: '휴대폰 사기'},
-      {id: 2, subject: '장보기'},
-    ]);
     
-    const onSumbit = () => {
-      todos.value.push({
-        id: Date.now(),
-        subject: todo.value,
-      });
+    const todos = ref([]);
+
+    const addTodo = (todo) => {
+      todos.value.push(todo);
     };
 
+    const deleteButton = (index) => {
+      todos.value.splice(index, 1);
+    };
+
+    const toggleTodo = (index) => {
+      todos.value[index].completed = !todos.value[index].completed;
+    };
+
+    const searchText = ref('');
+    const filteredTodos = computed(() => {
+      if (searchText.value) {
+        return todos.value.filter(todo => {
+          return todo.subject.includes(searchText.value);
+        });
+      }
+
+      return todos.value;
+    });
+
     return {
-      todo,
       todos,
-      onSumbit,
+      addTodo,
+      deleteButton,
+      toggleTodo,
+      searchText,
+      filteredTodos
     };
   }
 }
 </script>
 
 <style>
-  .name {
-    color: red;
+  .todo {
+    color: gray;
+    text-decoration: line-through;
   }
 </style>
