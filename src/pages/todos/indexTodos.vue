@@ -1,13 +1,12 @@
 <template>
-    <router-view/>
-    <div class="container">
+    <div>
       <h2>To-Do List</h2>
       <input
-          class="form-control"
-          type="text" 
-          v-model="searchText"
-          placeholder="Search"
-          @keyup.enter="searchTodo"
+        class="form-control"
+        type="text" 
+        v-model="searchText"
+        placeholder="Search"
+        @keyup.enter="searchTodo"
       >
       <hr />
       <TodoSimpleForm @add-todo="addTodo" />
@@ -16,17 +15,16 @@
       <div v-if="!todos.length">
         There is nothing to display
       </div>
-      <!-- 부모에서 자식 보낼때 props -->
       <TodoList 
         :todos="todos" 
-        @toggle-todo="toggleTodo" 
-        @delete-todo="deleteButton"
+        @toggle-todo="toggleTodo"
+        @delete-todo="deleteTodo"
       />
-      <hr/>
+      <hr />
       <nav aria-label="Page navigation example">
         <ul class="pagination">
           <li v-if="currentPage !== 1" class="page-item">
-            <a style="cursor: pointer;" class="page-link" @click="getTodos(currentPage - 1)">
+            <a style="cursor: pointer" class="page-link" @click="getTodos(currentPage - 1)">
               Previous
             </a>
           </li>
@@ -36,10 +34,10 @@
             class="page-item"
             :class="currentPage === page ? 'active' : ''"
           >
-            <a style="cursor: pointer;" class="page-link" @click="getTodos(page)">{{page}}</a>
+            <a style="cursor: pointer" class="page-link" @click="getTodos(page)">{{page}}</a>
           </li>
           <li v-if="numberOfPages !== currentPage" class="page-item">
-            <a style="cursor: pointer;" class="page-link" @click="getTodos(currentPage + 1)">Next</a>
+            <a style="cursor: pointer" class="page-link" @click="getTodos(currentPage + 1)">Next</a>
           </li>
         </ul>
       </nav>
@@ -55,39 +53,31 @@
   export default {
     components: {
       TodoSimpleForm,
-      TodoList
+      TodoList,
     },
     setup() {
-      
       const todos = ref([]);
       const error = ref('');
       const numberOfTodos = ref(0);
       let limit = 5;
       const currentPage = ref(1);
       const searchText = ref('');
-  
       const numberOfPages = computed(() => {
         return Math.ceil(numberOfTodos.value/limit);
       });
   
-      // const a = reactive({
-      //   b: 1
-      // })
-      // watchEffect(() => {
-      //   console.log(a.b);
-      // });
-      // a.b = 4;
-  
       const getTodos = async (page = currentPage.value) => {
         currentPage.value = page;
         try {
-          const res = await axios.get(`http://localhost:3000/todos?_sort=id&_order=desc&subject_like=${searchText.value}&_page=${page}&_limit=${limit}`);
-          numberOfTodos.value =  res.headers['x-total-count'];
+          const res = await axios.get(
+            `http://localhost:3000/todos?_sort=id&_order=desc&subject_like=${searchText.value}&_page=${page}&_limit=${limit}`
+          );
+          numberOfTodos.value = res.headers['x-total-count'];
           todos.value = res.data;
-        }catch (err) {
+        } catch (err) {
           console.log(err);
           error.value = 'Something went wrong.';
-        }
+        }    
       };
   
       getTodos();
@@ -100,44 +90,41 @@
             subject: todo.subject,
             completed: todo.completed,
           });
+  
           getTodos(1);
-        } catch(err) {
-          console.log(err)
+        } catch (err) {
+          console.log(err);
           error.value = 'Something went wrong.';
         }
-        // .then(res => {
-        //   todos.value.push(res.data);
-        //   console.log(res);
-        // }).catch(err => {
-        //   console.log(err)
-        //   error.value = 'Something went wrong.';
-        // });
       };
   
-      const deleteButton = async (index) => {
+      const deleteTodo = async (index) => {
         error.value = '';
         const id = todos.value[index].id;
         try {
           await axios.delete('http://localhost:3000/todos/' + id);
+          
           getTodos(1);
-        }catch(err){
+        } catch (err) {
           console.log(err);
           error.value = 'Something went wrong.';
         }
       };
   
-      const toggleTodo = async (index) => {
+      const toggleTodo = async (index, checked) => {
         error.value = '';
         const id = todos.value[index].id;
-        try{
+        try {
           await axios.patch('http://localhost:3000/todos/' + id, {
-            completed: !todos.value[index].completed
+            completed: checked
           });
-          todos.value[index].completed = !todos.value[index].completed;
-        }catch(err) {
+  
+          todos.value[index].completed = checked
+        } catch (err) {
           console.log(err);
           error.value = 'Something went wrong.';
         }
+        
       };
   
       let timeout = null;
@@ -147,35 +134,23 @@
       };
   
       watch(searchText, () => {
-  
-        // 처음엔 null 초깃값이었다가 setTimeout 하고 나서 2초 후에 clear 해줌
         clearTimeout(timeout);
         timeout = setTimeout(() => {
           getTodos(1);
-        }, 2000);
-      })
-      // const filteredTodos = computed(() => {
-      //   if (searchText.value) {
-      //     return todos.value.filter(todo => {
-      //       return todo.subject.includes(searchText.value);
-      //     });
-      //   }
-  
-      //   return todos.value;
-      // });
+        }, 2000);     
+      });
   
       return {
+        searchTodo,
         todos,
         addTodo,
-        deleteButton,
+        deleteTodo,
         toggleTodo,
         searchText,
-        // filteredTodos,
         error,
-        getTodos,
         numberOfPages,
         currentPage,
-        searchTodo
+        getTodos,
       };
     }
   }
