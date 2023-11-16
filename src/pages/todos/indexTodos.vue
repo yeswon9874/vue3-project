@@ -61,7 +61,7 @@
   import { ref, computed, watch } from 'vue';
   //import TodoSimpleForm from '@/components/TodoSimpleForm.vue';
   import TodoList from '@/components/TodoList.vue';
-  import axios from 'axios';
+  import axios from '@/axios';
   import ToastComponent from '@/components/ToastComponent.vue';
   import { useToast } from '@/composables/toast';
   import { useRouter } from 'vue-router';
@@ -95,7 +95,7 @@
         currentPage.value = page;
         try {
           const res = await axios.get(
-            `http://localhost:3000/todos?_sort=id&_order=desc&subject_like=${searchText.value}&_page=${page}&_limit=${limit}`
+            `todos?_sort=id&_order=desc&subject_like=${searchText.value}&_page=${page}&_limit=${limit}`
           );
           numberOfTodos.value = res.headers['x-total-count'];
           todos.value = res.data;
@@ -112,7 +112,7 @@
         // 데이터베이스 투두를 저장
         error.value = '';
         try {
-          await axios.post('http://localhost:3000/todos', {
+          await axios.post('todos', {
             subject: todo.subject,
             completed: todo.completed,
           });
@@ -128,7 +128,7 @@
       const deleteTodo = async (id) => {
         error.value = '';
         try {
-          await axios.delete('http://localhost:3000/todos/' + id);
+          await axios.delete('todos/' + id);
           
           getTodos(1);
         } catch (err) {
@@ -142,7 +142,7 @@
         error.value = '';
         const id = todos.value[index].id;
         try {
-          await axios.patch('http://localhost:3000/todos/' + id, {
+          await axios.patch('todos/' + id, {
             completed: checked
           });
   

@@ -8,16 +8,15 @@
             class="form-control"
         >
         <div 
-            v-if="error"
-            class="text-red"
+        v-if="error"
+        class="text-red"
         >
-            {{ error }}
+        {{ error }}
         </div>
     </div>
 </template>
 
 <script>
-import { useContext } from 'vue';
 export default {
     props: {
         label: {
@@ -31,10 +30,9 @@ export default {
         subject: {
             type: String,
             required: true
-        }
+        },
     },
-    setup() {
-        const { emit } = useContext();
+    setup(props, { emit }) {
         const onInput = (e) => {
             emit('update:subject', e.target.value);
         };
@@ -47,7 +45,7 @@ export default {
 </script>
 
 <style scoped>
-  .text-red {
-    color: red;
-  }
+    .text-red {
+        color: red;
+    }
 </style>
