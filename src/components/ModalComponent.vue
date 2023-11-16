@@ -28,8 +28,13 @@ export default {
             emit('close');
         }
 
+        const onDelete = () => {
+            emit('delete');
+        }
+
         return {
             onClose,
+            onDelete,
         }
     }
 }

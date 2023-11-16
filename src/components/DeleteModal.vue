@@ -1,12 +1,12 @@
 <template>
-    <ModalComponent>2
-        <template title>
-        Delete Todo
+    <ModalComponent>
+        <template v-slot:title>
+        Delete Todo!!
         </template>
-        <template body>
+        <template v-slot:body>
         Are you sure you want to delete this todo?
         </template>
-        <template footer>
+        <template v-slot:footer>
             <button 
                 type="button" 
                 class="btn btn-secondary"
@@ -31,7 +31,7 @@ export default {
     components: {
         ModalComponent
     },
-    setup(props, { emit }) {
+     setup(props, { emit }) {
         const onClose = () => {
             emit('close');
         }
