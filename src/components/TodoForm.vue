@@ -8,11 +8,11 @@
   >
     <div class="row">
       <div class="col-6">
-      <InputComponent 
-        label="Subject"
-        v-model:subject="todo.subject"
-        :error="subjectError"
-      />
+        <InputComponent 
+          label="Subject" 
+          v-model:subject="todo.subject"
+          :error="subjectError"
+        />
       </div>
       <div v-if="editing" class="col-6">
         <div class="form-group">
@@ -32,9 +32,7 @@
       <div class="col-12">
         <div class="form-group">
           <label>Body</label>
-          <textarea v-model="todo.body" class="form-control" cols="30" rows="10">
- 
-          </textarea>
+          <textarea v-model="todo.body" class="form-control" cols="30" rows="10"></textarea>
         </div>
       </div>
     </div>
@@ -53,34 +51,25 @@
       Cancel
     </button>
   </form>
-  <transition name="fade">
-    <ToastComponent 
-    v-if="showToast"
-    :message="toastMessage"
-    :type="toastAlertType"
-    />
-  </transition>
 </template>
 
 <script>
 import { useRoute, useRouter } from 'vue-router';
 import axios from '@/axios';
-import { ref, computed} from 'vue';
+import { ref, computed } from 'vue';
 import _ from 'lodash';
-import ToastComponent from '@/components/ToastComponent.vue';
 import { useToast } from '@/composables/toast';
-import InputComponent from './InputComponent.vue';
-export default {
+import InputComponent from '@/components/InputComponent.vue';
 
+export default {
   components: {
-    ToastComponent,
     InputComponent
-  },  
+  },
   props: {
-    editing: {
-        type: Boolean,
-        default: false
-    }
+      editing: {
+          type: Boolean,
+          default: false
+      }
   },
     setup(props) {
         const route = useRoute();
@@ -90,33 +79,32 @@ export default {
             completed: false,
             body: ''
         });
+
         const subjectError = ref('');
         const originalTodo = ref(null);
         const loading = ref(false);
-
-        const { 
+        const {
           toastMessage,
           toastAlertType,
           showToast,
           triggerToast
         } = useToast();
 
-        const todoId = route.params.id
+        const todoId = route.params.id      
 
         const getTodo = async () => {
             loading.value = true;
           try {
-            const res = await axios.get(`todos/${todoId}
-            `);
-  
+            const res = await axios.get(`todos/${todoId}`);
+
             todo.value = { ...res.data };
             originalTodo.value = { ...res.data };
-  
+
             loading.value = false;
           } catch (error) {
             loading.value = false;
             console.log(error);
-            triggerToast('Something went wrong!', 'danger'); 
+            triggerToast('Something went wrong', 'danger');
           }
         };
 
@@ -137,42 +125,42 @@ export default {
         if (props.editing) {
             getTodo();
         }
-            
+
         const onSave = async () => {
-            if (!todo.value.subject) {
-                subjectError.value = 'Subject is required';
-                return;
+          subjectError.value = '';
+          if (!todo.value.subject) {
+            subjectError.value = 'Subject is required';
+            return;
+          }
+
+          try {
+            let res;
+            const data = {
+              subject: todo.value.subject,
+              completed: todo.value.completed,
+              body: todo.value.body,
+            };
+            if (props.editing) {
+              res = await axios.put(`todos/${todoId}`, data);
+              originalTodo.value = {...res.data};
+            } else {
+              res = await axios.post('todos', data);
+              todo.value.subject = '';
+              todo.value.body = '';
             }
-                try {
-                    let res;
-                    const data = {
-                        subject: todo.value.subject,
-                        completed: todo.value.completed,
-                        body: todo.value.body
-                    }
-                    if (props.editing) { 
-                        res = await axios.put(`todos/${todoId}
-                        `, data);
-                        originalTodo.value = {...res.data};
-                    } else {
-                        res = await axios.post('todos', data);
-                        todo.value.subject = '';
-                        todo.value.body = '';
-                    }
-        
-                    const message = 'Successfully ' + (props.editing ? 'Updated!' : 'Created!');
-                    triggerToast(message);
+            
+            const message = 'Successfully ' + (props.editing ? 'Updated!' : 'Created!');
+            triggerToast(message);
 
-                    if (!props.editing) {
-                      router.push({
-                        name: 'Todos'
-                      })
-                    }
-                } catch (error) {
-                    console.log(error);
-                    triggerToast('Something went wrong!', 'danger');
-                }
-
+            if (!props.editing) {
+              router.push({
+                name: 'Todos'
+              })
+            }
+          } catch (error) {
+            console.log(error);
+            triggerToast('Something went wrong', 'danger')
+          }
         };
 
         return {
@@ -190,23 +178,23 @@ export default {
     }
 }
 </script>
-    
+
 <style scoped>
-    
-    .fade-enter-active,
-    .fade-leave-active {
-      transition: all 0.5s ease;
-    }
 
-    .fade-enter-from,
-    .fade-leave-to {
-      opacity: 0;
-      transform: translateY(-30px);
-    }
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: all 0.5s ease;
+  }
 
-    .fade-enter-to,
-    .fade-leave-from {
-      opacity: 1;
-      transform: translateY(0px);
-    }
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+
+  .fade-enter-to,
+  .fade-leave-from {
+    opacity: 1;
+    transform: translateY(0px);
+  }
 </style>
