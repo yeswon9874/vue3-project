@@ -1,12 +1,12 @@
 <template>
     <ModalComponent>2
-        <template #title>
+        <template title>
         Delete Todo
         </template>
-        <template #body>
+        <template body>
         Are you sure you want to delete this todo?
         </template>
-        <template #footer>
+        <template footer>
             <button 
                 type="button" 
                 class="btn btn-secondary"
